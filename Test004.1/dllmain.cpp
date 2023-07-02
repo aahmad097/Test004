@@ -13,7 +13,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     /// <param name="ul_reason_for_call"></param>
     /// <param name="lpReserved"></param>
     /// <returns></returns>
-    MessageBoxW(NULL, L"Via PropertySheetHandlers", L"Persistence", MB_OK);
+    MessageBoxW(NULL, L"Via ProperySheetHandler", L"Persistence", MB_OK);
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
