@@ -131,9 +131,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Installer.cpp" />
+    <ClCompile Include="logging.cpp" />
     <ClCompile Include="reg.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="logging.h" />
     <ClInclude Include="reg.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
