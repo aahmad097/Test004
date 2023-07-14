@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test004.6", "Test004.6\Test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Installer", "Installer\Installer.vcxproj", "{F344D901-81BD-4EA3-B849-2004B54088AC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ATLIconHandler", "ATLIconHandler\ATLIconHandler.vcxproj", "{A7DDD78E-8F80-4D3E-A655-2313FA011774}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -91,6 +93,14 @@ Global
 		{F344D901-81BD-4EA3-B849-2004B54088AC}.Release|x64.Build.0 = Release|x64
 		{F344D901-81BD-4EA3-B849-2004B54088AC}.Release|x86.ActiveCfg = Release|Win32
 		{F344D901-81BD-4EA3-B849-2004B54088AC}.Release|x86.Build.0 = Release|Win32
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Debug|x64.ActiveCfg = Debug|x64
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Debug|x64.Build.0 = Debug|x64
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Debug|x86.ActiveCfg = Debug|Win32
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Debug|x86.Build.0 = Debug|Win32
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Release|x64.ActiveCfg = Release|x64
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Release|x64.Build.0 = Release|x64
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Release|x86.ActiveCfg = Release|Win32
+		{A7DDD78E-8F80-4D3E-A655-2313FA011774}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
