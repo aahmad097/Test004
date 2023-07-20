@@ -1,0 +1,36 @@
+// ATLThumbnailImageHandler.idl : IDL source for ATLThumbnailImageHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLThumbnailImageHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(f86394cb-5461-46e7-a4d8-ebd951fbccfb),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IThumbnailImageHandler : IDispatch
+{
+};
+[
+	uuid(b9b449be-a0ff-4220-83cf-05cd4d02f6c9),
+	version(1.0),
+]
+library ATLThumbnailImageHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(d0107e29-2f48-4d8f-86ee-a5a1850f6a02)
+	]
+	coclass ThumbnailImageHandler
+	{
+		[default] interface IThumbnailImageHandler;
+	};
+};
+
+import "shobjidl.idl";

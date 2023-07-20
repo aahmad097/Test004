@@ -1,0 +1,36 @@
+// ATLDataHandler.idl : IDL source for ATLDataHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLDataHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(cf5c8718-eab3-448d-956a-2b25efdca836),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IDataHandler : IDispatch
+{
+};
+[
+	uuid(31646168-cc0b-4376-8ca1-a05a3e7de1a6),
+	version(1.0),
+]
+library ATLDataHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(d1145a3f-5d9b-479c-8633-b60470c4e9e1)
+	]
+	coclass DataHandler
+	{
+		[default] interface IDataHandler;
+	};
+};
+
+import "shobjidl.idl";

