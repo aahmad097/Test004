@@ -1,0 +1,36 @@
+// ATLIconOverlayHandler.idl : IDL source for ATLIconOverlayHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLIconOverlayHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(094a1e15-87ea-47d3-8a21-76d03cca2dd0),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IIconOverlayHandler : IDispatch
+{
+};
+[
+	uuid(65e96ab0-91ba-4001-b469-c01fcf83f7cc),
+	version(1.0),
+]
+library ATLIconOverlayHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(246b42c9-648b-4e8d-a30d-a3a92fe74030)
+	]
+	coclass IconOverlayHandler
+	{
+		[default] interface IIconOverlayHandler;
+	};
+};
+
+import "shobjidl.idl";

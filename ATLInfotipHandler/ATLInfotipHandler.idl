@@ -1,0 +1,36 @@
+// ATLInfotipHandler.idl : IDL source for ATLInfotipHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLInfotipHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(9d9df31a-a901-46a9-9dfc-78fd6648a56e),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IInfotipHandler : IDispatch
+{
+};
+[
+	uuid(8d635abc-2db0-4659-a334-f014ea0c99aa),
+	version(1.0),
+]
+library ATLInfotipHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(53df2c73-0211-4a2e-88e7-3aa313050683)
+	]
+	coclass InfotipHandler
+	{
+		[default] interface IInfotipHandler;
+	};
+};
+
+import "shobjidl.idl";

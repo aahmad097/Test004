@@ -1,0 +1,36 @@
+// ATLPropertySheetHandler.idl : IDL source for ATLPropertySheetHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLPropertySheetHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(061d0aca-f559-4720-9506-870aac51e012),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IPropertySheetHandler : IDispatch
+{
+};
+[
+	uuid(96cb669e-8ca0-4038-ab9e-62df19f06171),
+	version(1.0),
+]
+library ATLPropertySheetHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(b3a84005-8f89-4509-9521-60b805ac861f)
+	]
+	coclass PropertySheetHandler
+	{
+		[default] interface IPropertySheetHandler;
+	};
+};
+
+import "shobjidl.idl";

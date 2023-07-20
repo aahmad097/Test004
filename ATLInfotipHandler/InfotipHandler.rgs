@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {53df2c73-0211-4a2e-88e7-3aa313050683} = s 'InfotipHandler class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{8d635abc-2db0-4659-a334-f014ea0c99aa}'
+			Version = s '1.0'
+		}
+	}
+}

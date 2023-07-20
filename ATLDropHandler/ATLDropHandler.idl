@@ -1,0 +1,36 @@
+// ATLDropHandler.idl : IDL source for ATLDropHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLDropHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(ef2ca177-763d-421b-9f0e-404cb2f36876),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IDropHandler : IDispatch
+{
+};
+[
+	uuid(ffbdfc90-2fb9-43b7-afed-6bae7b41e8c3),
+	version(1.0),
+]
+library ATLDropHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(2dc1af77-e442-4b72-ba05-dadbb69c1266)
+	]
+	coclass DropHandler
+	{
+		[default] interface IDropHandler;
+	};
+};
+
+import "shobjidl.idl";
