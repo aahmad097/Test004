@@ -1,0 +1,36 @@
+// ATLCopyHookHandler.idl : IDL source for ATLCopyHookHandler
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ATLCopyHookHandler.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(36c9bff0-0602-42e8-a8b1-672df65946b8),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface ICopyHookHandler : IDispatch
+{
+};
+[
+	uuid(0c7a6dea-1288-4bc2-b8bd-00d2447556a7),
+	version(1.0),
+]
+library ATLCopyHookHandlerLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(f3181a48-67c4-4f0f-bb5c-f278e9f3ee32)
+	]
+	coclass CopyHookHandler
+	{
+		[default] interface ICopyHookHandler;
+	};
+};
+
+import "shobjidl.idl";

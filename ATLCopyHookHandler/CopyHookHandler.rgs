@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {f3181a48-67c4-4f0f-bb5c-f278e9f3ee32} = s 'CopyHookHandler class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{0c7a6dea-1288-4bc2-b8bd-00d2447556a7}'
+			Version = s '1.0'
+		}
+	}
+}

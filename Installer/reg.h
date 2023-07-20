@@ -14,8 +14,7 @@
 #define PROPERTY_SHEET_HANDLER 0x4 // stable - subfunctions not getting called
 #define THUMBNAIL_IMAGE_HANDLER 0x5 
 #define INFOTIP_HANDLER 0x6 // stable - infotip not being displayed :thinking_emoji:
-#define METADATA_HANDLER 0x7 // it doesnt look like this fucking thing even worked when i was testing it, idk why i added it here
-#define COPY_HOOK_HANDLER 0x8
+#define COPY_HOOK_HANDLER 0x7 // work - explorer stable , operation is slow
 
 
 namespace reg {

