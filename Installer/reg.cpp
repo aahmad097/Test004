@@ -1,7 +1,5 @@
 #include "reg.h"
 #include "logging.h"
-
-
 #include <cwchar>
 
 #define MAX_KEY_LENGTH 255
