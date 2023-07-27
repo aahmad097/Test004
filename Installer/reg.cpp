@@ -506,7 +506,7 @@ namespace reg {
 
 	}
 
-	BOOL Hijack(BYTE Type, WCHAR* ext, std::wstring dllPath)
+	BOOL  Hijack(BYTE Type, WCHAR* ext, std::wstring dllPath)
 	{
 
 		HKEY hKey = NULL;

