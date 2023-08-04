@@ -65,7 +65,7 @@ We will be focusing on shell extensibility ... (Shell Extensions)
 
 ---
 
-# Shell Extenaion Handler Examples (non file tipe association) #
+# Shell Extension Handler Examples (non file type association) #
 
 - Column Handler (XP and earlier)
 - Copy hook handler
